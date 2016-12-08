@@ -97,8 +97,10 @@ public final class Shell implements Runnable {
                     break;
                 case "exit":
                     if (tokens.length > 1) tooManyArgs();
-                    else
+                    else {
+                        println("Exiting...");
                         return;
+                    }
                     break;
                 default:
                     // Wrong command

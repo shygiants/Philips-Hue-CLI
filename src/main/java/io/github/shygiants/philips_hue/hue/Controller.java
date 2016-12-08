@@ -1,5 +1,6 @@
 package io.github.shygiants.philips_hue.hue;
 
+import com.philips.lighting.hue.listener.PHLightListener;
 import com.philips.lighting.hue.sdk.PHAccessPoint;
 import com.philips.lighting.hue.sdk.PHHueSDK;
 import com.philips.lighting.hue.sdk.PHMessageType;
@@ -8,11 +9,13 @@ import com.philips.lighting.hue.sdk.utilities.PHUtilities;
 import com.philips.lighting.model.*;
 import io.github.shygiants.philips_hue.console.Shell;
 import io.github.shygiants.philips_hue.util.Resources;
+import io.github.shygiants.philips_hue.util.Stop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @auther Sanghoon Yoon (iDBLab, shygiants@gmail.com)
@@ -106,8 +109,48 @@ public final class Controller implements PHSDKListener {
         PHLightState lightState = new PHLightState();
         lightState.setOn(onOff);
 
-        phBridge.updateLightState(light, lightState);
-        System.out.println(String.format(Resources.strings("consoleLight" + (onOff? "On": "Off")), id));
+        final Stop stop = new Stop();
+
+        phBridge.updateLightState(light, lightState, new PHLightListener() {
+            @Override
+            public void onReceivingLightDetails(PHLight phLight) {
+
+            }
+
+            @Override
+            public void onReceivingLights(List<PHBridgeResource> list) {
+
+            }
+
+            @Override
+            public void onSearchComplete() {
+
+            }
+
+            @Override
+            public void onSuccess() {
+                System.out.println(String.format(Resources.strings("consoleLight" + (onOff? "On": "Off")), id));
+                stop.go();
+            }
+
+            @Override
+            public void onError(int i, String s) {
+                if (s == null || s.trim().isEmpty()) {
+                    System.out.println("Error code: " + i);
+                } else {
+                    System.out.println(s);
+                }
+
+                stop.go();
+            }
+
+            @Override
+            public void onStateUpdate(Map<String, String> map, List<PHHueError> list) {
+
+            }
+        });
+
+        stop.stop();
     }
 
     public void color(String id) {
